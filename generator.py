@@ -11,42 +11,69 @@
 #
 # 生词表生成后可导入欧陆词典一类的app，快速预习一下，可以大幅提升阅读原版书籍时的体验。
 
-# In[1]:
-
-import collections
 import re
 import string
 
 import nltk
 import textract
-from nltk.stem.porter import PorterStemmer
+from nltk import pos_tag
+from nltk.corpus import stopwords, wordnet
+from nltk.stem import WordNetLemmatizer
 
-porter_stemmer = PorterStemmer()
+nltk.download('stopwords')
+nltk.download('wordnet')
+stop_words = set(stopwords.words('english'))
+
+# 初始化词形还原器
+lemmatizer = WordNetLemmatizer()
 
 # 目前支持txt/pdf/doc/docx/csv/epub格式，扫描版的PDF不行，只能是文字版的。
 #
 # 除了txt外，其他格式读取时花的时间会长一点，请耐心等待。
 
-# In[2]:
-
-filename = 'pride_and_prejudice.txt'
+# filename = 'pride_and_prejudice.txt'
+filename = '1984.txt'
 
 # 读取文本，去掉标点符号。
 
-# In[3]:
-
 byte = textract.process(filename)
-
-# In[4]:
 
 text = byte.decode("utf-8")
 
-# In[5]:
-
-text.translate(str.maketrans('', '', string.punctuation))
-text = re.sub(r'[^\w\s]', '', text)
+text = text.translate(str.maketrans("\n-", '  '))
+text = text.translate(str.maketrans('', '', string.punctuation))
+text = re.sub(r'[0-9]', '', text)
 nltk_tokens = nltk.word_tokenize(text)
-words = [porter_stemmer.stem(w) for w in nltk_tokens]
+
+
+# 获取 WordNet POS 标签
+def get_wordnet_pos(tokens):
+    tag_dict = {
+        "J": wordnet.ADJ,  # 形容词
+        "N": wordnet.NOUN,  # 名词
+        "V": wordnet.VERB,  # 动词
+        "R": wordnet.ADV  # 副词
+    }
+    nltk_pos_tags = pos_tag(tokens)
+
+    words = [
+        word.lower() if tag != 'NNP' or tag != 'NNPS' else word
+        for (word, tag) in nltk_pos_tags
+    ]
+
+    tags = [
+        tag_dict.get(tag[0].upper(), wordnet.VERB) for _, tag in nltk_pos_tags
+    ]
+
+    return dict(zip(words, tags))
+
+
+# 获取词性和词形还原
+wordnet_pos_tags = get_wordnet_pos(nltk_tokens)
+lemmatized_tokens = {
+    lemmatizer.lemmatize(word, tag)
+    for word, tag in wordnet_pos_tags.items() if word not in stop_words
+}
 
 # 统计词频，得到全部单词表。
 # 这里我做了一点增强，将所有单词按出现频率由高到低排列。
@@ -57,10 +84,17 @@ words = [porter_stemmer.stem(w) for w in nltk_tokens]
 
 # In[6]:
 
-word_count = collections.Counter(words)
-word_count = sorted(word_count.items(), key=lambda pair: pair[1], reverse=True)
-clean_words = [pair[0] for pair in word_count[1001:]]
-len(clean_words)
+# word_count = collections.Counter(lemmatized_tokens)
+# word_count = sorted(word_count.items(), key=lambda pair: pair[1], reverse=True)
+# clean_words = [pair[0] for pair in word_count]
+# len(clean_words)
+
+known_words = open('middleschool1600.txt', 'r',
+                   encoding='utf-8').read().replace('\n', ' ').split(' ')
+known_words = set(known_words)
+
+# clean_words = lemmatized_tokens - known_words
+clean_words = lemmatized_tokens
 
 # ## 美国当代英语语料库COCA
 #
@@ -76,16 +110,16 @@ len(clean_words)
 
 # In[7]:
 
-dict_words = open('common30k.txt', 'r',
-                  encoding='utf-8').read().replace('\n', ' ').split(' ')
-dict_words = dict_words[2001:]
+# dict_words = open('common30k.txt', 'r',
+#                   encoding='utf-8').read().replace('\n', ' ').split(' ')
+# dict_words = dict_words[3001:]
 
 # 我附的高频词表是顺序的，即高频词在前，低频词在后。比对时我去掉了前面的2000常用词，如果你觉得自己词汇量低，可以考虑只去掉1000；反之亦然。
 
 # In[8]:
 
-new_words = [w for w in clean_words if w in dict_words]
-len(new_words)
+# new_words = [w for w in clean_words if w in dict_words]
+# len(new_words)
 
 # 这个词表里肯定有很多还是你认识的，不过我觉得在生词本里过一遍（尤其是欧陆提供很多例句）看看怎么用还是有帮助的。如果认识的词特别多，请返回上面一步干掉更多高频词。我个人的小经验是阅读生词量在10%左右的小说学习+阅读体验比较好。
 #
@@ -95,7 +129,7 @@ len(new_words)
 
 glossary = filename.split('.')[0] + '_glossary.txt'
 with open(glossary, 'w') as output:
-    output.write('\n'.join(new_words))
+    output.write('\n'.join(clean_words))
 
 # ## 不要死记硬背
 #
