@@ -8,6 +8,8 @@ authors = [
 dependencies = [
     "nltk>=3.9.1",
     "textract-py3>=2.1.0",
+    "spacy>=3.8.3",
+    "pip>=24.3.1",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"

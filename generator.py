@@ -31,8 +31,8 @@ lemmatizer = WordNetLemmatizer()
 #
 # 除了txt外，其他格式读取时花的时间会长一点，请耐心等待。
 
-# filename = 'pride_and_prejudice.txt'
-filename = '1984.txt'
+filename = 'pride_and_prejudice.txt'
+# filename = '1984.txt'
 
 # 读取文本，去掉标点符号。
 
@@ -40,7 +40,7 @@ byte = textract.process(filename)
 
 text = byte.decode("utf-8")
 
-text = text.translate(str.maketrans("\n-", '  '))
+text = text.translate(str.maketrans("\n—-", '   '))
 text = text.translate(str.maketrans('', '', string.punctuation))
 text = re.sub(r'[0-9]', '', text)
 nltk_tokens = nltk.word_tokenize(text)
@@ -93,8 +93,7 @@ known_words = open('middleschool1600.txt', 'r',
                    encoding='utf-8').read().replace('\n', ' ').split(' ')
 known_words = set(known_words)
 
-# clean_words = lemmatized_tokens - known_words
-clean_words = lemmatized_tokens
+clean_words = lemmatized_tokens - known_words
 
 # ## 美国当代英语语料库COCA
 #
