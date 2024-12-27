@@ -1,0 +1,15 @@
+[project]
+name = "GlossaryGenerator"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "sd44", email = "sd44sd44@yeah.net"},
+]
+dependencies = ["nltk>=3.9.1", "six>=1.17.0", "textract-py3>=2.1.0"]
+requires-python = "==3.12.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
