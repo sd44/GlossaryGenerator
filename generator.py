@@ -14,25 +14,14 @@
 import re
 import string
 
-import nltk
 import textract
-from nltk import pos_tag
-from nltk.corpus import stopwords, wordnet
-from nltk.stem import WordNetLemmatizer
-
-nltk.download('stopwords')
-nltk.download('wordnet')
-stop_words = set(stopwords.words('english'))
-
-# 初始化词形还原器
-lemmatizer = WordNetLemmatizer()
 
 # 目前支持txt/pdf/doc/docx/csv/epub格式，扫描版的PDF不行，只能是文字版的。
 #
 # 除了txt外，其他格式读取时花的时间会长一点，请耐心等待。
 
-filename = 'pride_and_prejudice.txt'
-# filename = '1984.txt'
+# filename = 'pride_and_prejudice.txt'
+filename = '1984.txt'
 
 # 读取文本，去掉标点符号。
 
@@ -40,40 +29,35 @@ byte = textract.process(filename)
 
 text = byte.decode("utf-8")
 
-text = text.translate(str.maketrans("\n—-", '   '))
-text = text.translate(str.maketrans('', '', string.punctuation))
+text = text.translate(str.maketrans("—-", '  '))
 text = re.sub(r'[0-9]', '', text)
-nltk_tokens = nltk.word_tokenize(text)
+text = text.translate(str.maketrans('', '', string.punctuation))
+
+print("Reading text over!\n Now let's spacy")
 
 
-# 获取 WordNet POS 标签
-def get_wordnet_pos(tokens):
-    tag_dict = {
-        "J": wordnet.ADJ,  # 形容词
-        "N": wordnet.NOUN,  # 名词
-        "V": wordnet.VERB,  # 动词
-        "R": wordnet.ADV  # 副词
-    }
-    nltk_pos_tags = pos_tag(tokens)
+import spacy
 
-    words = [
-        word.lower() if tag != 'NNP' or tag != 'NNPS' else word
-        for (word, tag) in nltk_pos_tags
-    ]
+nlp = spacy.load("en_core_web_sm")
+doc = nlp(text)
 
-    tags = [
-        tag_dict.get(tag[0].upper(), wordnet.VERB) for _, tag in nltk_pos_tags
-    ]
+wordset= set()
 
-    return dict(zip(words, tags))
+# token.text: 单词的原始形式。
+# token.lemma_: 单词的基本形式（或词干）。例如，“running”的词干是“run”。
+# token.pos_: 单词的粗粒度的词性标注，如名词、动词、形容词等。
+# token.tag_: 单词的细粒度的词性标注，提供更多的语法信息。
+# token.dep_: 单词在句子中的依存关系角色，例如主语、宾语等。
+# token.shape_: 单词的形状信息，例如，单词的大小写，是否有标点符号等。
+# token.is_alpha: 这是一个布尔值，用于检查token是否全部由字母组成。
+# token.is_stop: 这是一个布尔值，用于检查token是否为停用词（如“the”、“is”等在英语中非常常见但通常不包含太多信息的词）。
+for token in doc:
+    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
+            token.shape_, token.is_alpha, token.is_stop)
+    if not token.is_stop and token.is_alpha:
+        wordset.add(token.lemma_.lower())
 
-
-# 获取词性和词形还原
-wordnet_pos_tags = get_wordnet_pos(nltk_tokens)
-lemmatized_tokens = {
-    lemmatizer.lemmatize(word, tag)
-    for word, tag in wordnet_pos_tags.items() if word not in stop_words
-}
+wordset.add(token.lemma_)
 
 # 统计词频，得到全部单词表。
 # 这里我做了一点增强，将所有单词按出现频率由高到低排列。
@@ -93,7 +77,7 @@ known_words = open('middleschool1600.txt', 'r',
                    encoding='utf-8').read().replace('\n', ' ').split(' ')
 known_words = set(known_words)
 
-clean_words = lemmatized_tokens - known_words
+clean_words = wordset - known_words
 
 # ## 美国当代英语语料库COCA
 #
