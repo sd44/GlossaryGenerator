@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """生成文本单词表，fork自https://github.com/rfg1024/GlossaryGenerator
 
 Examples:
@@ -18,6 +19,7 @@ Examples:
 import re
 from pathlib import PurePath
 import textract
+import argparse
 
 
 def read_file(filename):
@@ -116,3 +118,28 @@ def get_glossaries(filename,
     with open(glossary, 'w') as output:
         output.write('\n'.join(cleanwords))
     print('Glossary generated:', glossary, '\n\n')
+
+
+def main():
+
+    # 定义一个ArgumentParser实例:
+    parser = argparse.ArgumentParser(
+        prog='generator',
+        description='generator text glossaries',
+        epilog='https://github.com/sd44/generator')
+
+    parser.add_argument('-f', '--filename', type=str, required=True)
+    parser.add_argument('-d', '--dict',  default='middleschool1600.txt', type=str, help="已知单词字典文件名")
+    parser.add_argument('-n', '--num', default=0, type=int, help="处理结果为生词表与dict字典前n个单词的差集")
+
+    args = parser.parse_args()
+    print("parsed args:")
+
+    # 打印参数:
+    print(f'filename = {args.filename}')
+    print(f'dict = {args.dict}')
+    print(f'known_num = {args.num}')
+
+
+if __name__ == '__main__':
+    main()

@@ -1,17 +1,33 @@
-主要目的是配合英语学习的透析阅读法使用，什么叫透析阅读法请自行搜索。
+Fork自 https://github.com/rfg1024/GlossaryGenerator
 
 
 ## 原理
 
-程序很短，简单地说，就是：
+改用`spacy` 库进行处理
 
 1. 读取一本小说的文本，干掉复数、时态这些东西，得到一本小说的词汇表；
-2. 和常用高频词库对比，去掉特别高频的词和不常用的词，生成你可能不认识的词表。
+2. 和常用（高频）词库`dict`对比，去掉词库中排名前`num`个单词，生成你可能不认识的词表。
 
-生词表生成后可导入欧陆词典一类的app，快速预习一下，可以大幅提升阅读原版书籍时的体验。
+    目前预置词典有：
 
-用Jupyter Notebook写的，解释和可调参数也都在里面，请点开**generator.ipynb**阅读使用。
-运行前请先安装nltk和textract库。
+        - `COCA20000.txt`: COCA语料库20000词，高频排序
+        - `collins.txt`: 柯林斯语料库14148词，高频排序
+        - `common30k.txt`: 通常30000词，高频排序
+        - `middleschool1600.txt`: 中国初中1600词，字母排序
+
+生词表生成后可导入GoldenDict，欧陆词典一类app，快速预习一下，可以大幅提升阅读原版书籍时的体验。
+
+## 依赖python库
+
+参照`pyproject.toml`中内容
+
+``` toml
+dependencies = [
+    "textract-py3>=2.1.0",
+    "spacy>=3.8.3",
+    "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
+]
+```
 
 
 ## 支持格式
@@ -26,17 +42,12 @@
 
 非txt文件花的时间会久一点，对其他格式的支持不一定好，我没有测试特别多文件。
 
+## 使用方法
 
-## 增强版使用方法
+### 命令行方法
 
-觉得COCA词库或者Collins词库不符合自己需求的，或者里面认识词太多的，完全可以自行维护自己的生词库。
+`generator.py -h`
 
-下载后自行删掉coca或collins词表里自己认识的词；或者自己另外找一个大词库表慢慢删，会让自己用起来越来越顺手！
+### 函数方法
 
-补充了一个常用30000单词表，从高频到低频，可以删掉前面几千单词，后面一边用一边删。
-
-
-
-
-
-
+见`generator.py`有详细说明。
