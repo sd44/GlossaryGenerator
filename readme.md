@@ -1,5 +1,7 @@
 Fork自 https://github.com/rfg1024/GlossaryGenerator
 
+如今AI大模型快速发展，本脚本相比较本地部署AI大模型或其VIP，几乎毫无先进性，哈哈。
+
 
 ## 原理
 
