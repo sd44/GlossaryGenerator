@@ -16,10 +16,11 @@ Examples:
 
 """
 
+import argparse
 import re
 from pathlib import PurePath
+
 import textract
-import argparse
 
 
 def read_file(filename):
@@ -77,23 +78,23 @@ def spacy_lemma(text):
     return wordset
 
 
-def clean_word(wordset, known_word_file='middleschool1600.txt', known_lens=0):
+def clean_word(wordset, known_word_file='middleschool1600.txt', known_lens=-1):
     known_words = open(known_word_file, 'r',
                        encoding='utf-8').read().replace('\n', ' ').split(' ')
-    if known_lens == 0:
+    if known_lens == -1:
         known_lens = len(known_words)
     known_words = set(known_words[:known_lens])
     known_words.update(
         set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'))
 
     clean_words = sorted(wordset - known_words)
-    print(f'原词根还原单词数量 {len(wordset)}个\n清理后最终单词数量{len(clean_words)}个')
+    print(f'生成单词表数量{len(clean_words)}个')
     return clean_words
 
 
 def get_glossaries(filename,
                    known_word_file='middleschool1600.txt',
-                   known_lens=0):
+                   known_lens=-1):
     """在当前目录生成文本单词表，取差集（去掉已在单词列表 ``known_word_file``
     中出现的前``known_lens``个数量的单词）。
 
@@ -126,19 +127,30 @@ def main():
     parser = argparse.ArgumentParser(
         prog='generator',
         description='generator text glossaries',
-        epilog='https://github.com/sd44/generator')
+        epilog='https://github.com/sd44/generator',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument('-f', '--filename', type=str, required=True)
-    parser.add_argument('-d', '--dict',  default='middleschool1600.txt', type=str, help="已知单词字典文件名")
-    parser.add_argument('-n', '--num', default=0, type=int, help="处理结果为生词表与dict字典前n个单词的差集")
+    parser.add_argument('-f',
+                        '--filename',
+                        type=str,
+                        required=True,
+                        help='The text filename')
+    parser.add_argument('-d',
+                        '--dict-exclude',
+                        default='middleschool1600.txt',
+                        type=str,
+                        help="Exclude the words from the dictionary")
+    parser.add_argument(
+        '-n',
+        '--num',
+        default=-1,
+        type=int,
+        help=
+        "Exclude the first n words from the dictionary。Special Value：-1, All the words; 0, None of all"
+    )
 
     args = parser.parse_args()
-    print("parsed args:")
-
-    # 打印参数:
-    print(f'filename = {args.filename}')
-    print(f'dict = {args.dict}')
-    print(f'known_num = {args.num}')
+    get_glossaries(args.filename, args.dict_exclude, args.num)
 
 
 if __name__ == '__main__':

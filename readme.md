@@ -5,7 +5,7 @@ Fork自 https://github.com/rfg1024/GlossaryGenerator
 
 ## 原理
 
-改用`spacy` 库进行处理
+改用 `spacy` 库进行处理
 
 1. 读取一本小说的文本，干掉复数、时态这些东西，得到一本小说的词汇表；
 2. 和常用（高频）词库`dict`对比，去掉词库中排名前`num`个单词，生成你可能不认识的词表。
@@ -21,7 +21,7 @@ Fork自 https://github.com/rfg1024/GlossaryGenerator
 
 ## 依赖python库
 
-参照`pyproject.toml`中内容
+参照`pyproject.toml`中内容。其中en-core-web-sm可能需科学上网。
 
 ``` toml
 dependencies = [
@@ -50,6 +50,25 @@ dependencies = [
 
 `generator.py -h`
 
+```
+usage: generator [-h] -f FILENAME [-d DICT_EXCLUDE] [-n NUM]
+
+generator text glossaries
+
+options:
+  -h, --help            show this help message and exit
+  -f FILENAME, --filename FILENAME
+                        The text filename (default: None)
+  -d DICT_EXCLUDE, --dict-exclude DICT_EXCLUDE
+                        Exclude the words from the dictionary (default:
+                        middleschool1600.txt)
+  -n NUM, --num NUM     Exclude the first n words from the dictionary。Special
+                        Value：-1, All the words; 0, None of all (default: -1)
+
+https://github.com/sd44/generator
+```
+
+
 ### 函数方法
 
-见`generator.py`有详细说明。
+见`generator.py`，有详细注释。
