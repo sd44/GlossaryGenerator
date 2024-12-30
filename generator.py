@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""生成文本单词表，fork自https://github.com/rfg1024/GlossaryGenerator
+"""生成现有文本生词词形(Lemmatisation)表，fork自https://github.com/rfg1024/GlossaryGenerator
 
 Examples:
     books目录下存有三本书的txt文件，生成其单词表::
 
         print('Now glossaries The Old Man and the Sea')
-        get_glossaries('books/oldmanandthesea.txt', 'collins.txt', 3000)
+        get_glossaries('books/oldmanandthesea.txt', 'dict/collins.txt', 3000)
 
         print('Now glossaries Pride and Prejudice')
-        get_glossaries('books/pride_and_prejudice.txt', 'COCA20000.txt', 5000)
+        get_glossaries('books/pride_and_prejudice.txt', 'dict/COCA20000.txt', 5000)
 
         print('Now glossaries 1984')
         get_glossaries('books/1984.txt')
@@ -17,7 +17,6 @@ Examples:
 """
 
 import argparse
-import re
 from pathlib import PurePath
 
 import textract
@@ -100,7 +99,7 @@ def get_glossaries(filename,
 
     Args:
         filename (str): 要生成单词表的文件名
-        known_word_file (str): 已知单词列表文件名. 预设了:
+        known_word_file (str): 已知单词列表文件名. dict文件夹下预设:
             - ``COCA20000.txt``: COCA语料库20000词，高频排序
             - ``collins.txt``: 柯林斯语料库14148词，高频排序
             - ``common30k.txt``: 通常30000词，高频排序
@@ -137,7 +136,7 @@ def main():
                         help='The text filename')
     parser.add_argument('-d',
                         '--dict-exclude',
-                        default='middleschool1600.txt',
+                        default='dict/middleschool1600.txt',
                         type=str,
                         help="Exclude the words from the dictionary")
     parser.add_argument(
