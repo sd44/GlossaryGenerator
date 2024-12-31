@@ -8,23 +8,35 @@ from ECDICT import stardict
 MYSQLITE = 'ecdictSqlite.db'
 
 
-def find_lemma(exchange, orig_word):
+def find_lemma(orig_word, exchange):
     """找到ECDICT exchange字段的lemma字符串
 
     Note:
         ecdict exchange列中0: 代表Lemma，如 perceived 的 Lemma 是 perceive
+
+        类型 	说明
+        p 	过去式（did）
+        d 	过去分词（done）
+        i 	现在分词（doing）
+        3 	第三人称单数（does）
+        r 	形容词比较级（-er）
+        t 	形容词最高级（-est）
+        s 	名词复数形式
+        0 	Lemma，如 perceived 的 Lemma 是 perceive
+        1 	Lemma 的变换形式，比如 s 代表 apples 是其 lemma 的复数形式
     """
 
-    last_start_index = exchange.rfind('0:')
+    lists = exchange.split('/')
 
-    if last_start_index == -1 or last_start_index + 3 > len(exchange):
-        return orig_word
+    lemma_dict = {}
 
-    last_end_index = exchange.rfind('/', last_start_index)
-    if last_end_index == -1:
-        return exchange[last_start_index + 2:]
-    else:
-        return exchange[last_start_index + 2:last_end_index]
+    for trans in lists:
+        lemma_dict[trans[0]] = trans[2:]
+
+    if not lemma_dict.get('0'):
+        lemma_dict['0'] = orig_word
+
+    return lemma_dict
 
 
 def init_ecdict_sqlite():
@@ -47,7 +59,7 @@ def init_ecdict_sqlite():
         word = row[0]
         exchange = row[1]
 
-        lemma = find_lemma(exchange, word)
+        lemma = find_lemma(word, exchange)['0']
 
         # 更新 lemma 列的值
         update_query = "UPDATE stardict SET lemma = ? WHERE word = ?"
@@ -93,6 +105,25 @@ def xlsx_write(word_lines, columns, filename, sheetname='sheet1'):
     wb.close()
 
 
+def write_from_words(words, out_file):
+    """从单词表（每单词一行）获取单词，输出单词、音标和中文释义
+
+    """
+    con = sqlite3.connect(MYSQLITE)
+    cur = con.cursor()
+
+    # 查询所有行的数据
+    holders = ', '.join('?' for _ in words)
+    select_query = f"SELECT word, phonetic, translation FROM stardict WHERE word IN ({holders})"
+    cur.execute(select_query, words)
+    rows = cur.fetchall()
+    con.commit()
+    con.close()
+
+    xlsx_write(rows, ['word', 'phonetic', 'translation'], out_file,
+               'Words_Lemma_Sheet')
+
+
 def write_from_file(input_file):
     """从生字表文件（每单词一行）获取单词，输出包含两个sheet的excel文件，一个sheet含单词、词根、音标和中文释义。另一个sheet由前者词根生成,含单词，音标和中文释义。
 
@@ -120,24 +151,8 @@ def write_from_file(input_file):
     write_from_words(lemmas, out_file)
 
 
-def write_from_words(words, out_file):
-    """从单词表（每单词一行）获取单词，输出单词、音标和中文释义
-
-    """
-    con = sqlite3.connect(MYSQLITE)
-    cur = con.cursor()
-
-    # 查询所有行的数据
-    holders = ', '.join('?' for _ in words)
-    select_query = f"SELECT word, phonetic, translation FROM stardict WHERE word IN ({holders})"
-    cur.execute(select_query, words)
-    rows = cur.fetchall()
-    con.commit()
-    con.close()
-
-    xlsx_write(rows, ['word', 'phonetic', 'translation'], out_file,
-               'Words_Lemma_Sheet')
-
-
-# init_ecdict_sqlite() # 只需运行一次，生成sqlite3 db文件
-# write_from_words('FOO.txt')
+if not Path(MYSQLITE).exists():
+    init_ecdict_sqlite()  # 只需运行一次，生成sqlite3 db文件
+# write_from_file('glossary.txt')
+x = find_lemma('woman', '0:child/1:s/s:childrens')
+print(x)
