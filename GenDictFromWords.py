@@ -14,6 +14,7 @@ def find_lemma(orig_word, exchange):
     Note:
         ecdict exchange列中0: 代表Lemma，如 perceived 的 Lemma 是 perceive
 
+
         类型 	说明
         p 	过去式（did）
         d 	过去分词（done）
@@ -24,19 +25,23 @@ def find_lemma(orig_word, exchange):
         s 	名词复数形式
         0 	Lemma，如 perceived 的 Lemma 是 perceive
         1 	Lemma 的变换形式，比如 s 代表 apples 是其 lemma 的复数形式
+
+        此外，还有f: b: z:等未知分段
+
+        https://github.com/skywind3000/ECDICT/issues/23
     """
 
     lists = exchange.split('/')
 
-    lemma_dict = {}
+    inflection = {}
 
     for trans in lists:
-        lemma_dict[trans[0]] = trans[2:]
+        inflection[trans[0]] = trans[2:]
 
-    if not lemma_dict.get('0'):
-        lemma_dict['0'] = orig_word
+    if not inflection.get('0'):
+        inflection['0'] = orig_word
 
-    return lemma_dict
+    return inflection
 
 
 def init_ecdict_sqlite():
