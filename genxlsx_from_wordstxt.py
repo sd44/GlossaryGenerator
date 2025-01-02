@@ -1,3 +1,21 @@
+#!/usr/bin/env python3
+'''通过每行一词或短语的文本文件生成含两个sheet的xlsx单词表
+
+从生字表文件（每单词一行）获取单词短语，输出包含两个sheet的excel文件，一个sheet
+含单词、词根、音标和中文释义。另一个sheet由前者词根生成,含单词，音标和中文释义。
+
+Example:
+    示例::
+
+    if not Path(MYSQLITE).exists():
+        init_ecdict_sqlite()  # 只需运行一次，生成sqlite3 db文件
+    write_from_file('FOO.txt')
+
+Note:
+
+    别忘修改MYSQLITE变量
+
+'''
 import sqlite3
 from pathlib import Path, PurePath
 
@@ -13,7 +31,6 @@ def find_lemma(orig_word, exchange):
 
     Note:
         ecdict exchange列中0: 代表Lemma，如 perceived 的 Lemma 是 perceive
-
 
         类型 	说明
         p 	过去式（did）
@@ -89,7 +106,7 @@ def xlsx_write(word_lines, columns, filename, sheetname='sheet1'):
 
     rows = len(word_lines)
     if rows <= 1:
-        print(f'word_lines行数为{rows}，有误，不写入文件，推出')
+        print(f'word_lines行数为{rows}，有误，不写入文件，退出')
         return
 
     cols = len(columns)
@@ -130,7 +147,9 @@ def write_from_words(words, out_file):
 
 
 def write_from_file(input_file):
-    """从生字表文件（每单词一行）获取单词，输出包含两个sheet的excel文件，一个sheet含单词、词根、音标和中文释义。另一个sheet由前者词根生成,含单词，音标和中文释义。
+    """从生字表文件（每单词一行）获取单词短语，输出包含两个sheet的excel文件，一个
+    sheet含单词、词根、音标和中文释义。另一个sheet由前者词根生成,含单词，音标和
+    中文释义。
 
     """
     with open(input_file, 'r') as f:
@@ -158,6 +177,4 @@ def write_from_file(input_file):
 
 if not Path(MYSQLITE).exists():
     init_ecdict_sqlite()  # 只需运行一次，生成sqlite3 db文件
-# write_from_file('glossary.txt')
-x = find_lemma('woman', '0:child/1:s/s:childrens')
-print(x)
+write_from_file('FOO_test.txt')
