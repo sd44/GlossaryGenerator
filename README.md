@@ -1,3 +1,8 @@
+# 自用小工具
++ 单词表生成器，`generator.py`，使用方法见下方
+
++ 根据单词表生成相应单词原形、音标和中文释义等xlsx文件。详情见`genxlsx_from_wordstxt.py`，注释详细
+
 # 单词表生成器
 
 Fork自 https://github.com/rfg1024/GlossaryGenerator
