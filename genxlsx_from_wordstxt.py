@@ -26,8 +26,8 @@ from ECDICT import stardict
 MYSQLITE = 'ecdictSqlite.db'
 
 
-def find_lemma(orig_word, exchange):
-    """找到ECDICT exchange字段的lemma字符串
+def exchange2dict(orig_word, exchange):
+    """ECDICT exchange字段的转为字典
 
     Note:
         ecdict exchange列中0: 代表Lemma，如 perceived 的 Lemma 是 perceive
@@ -43,7 +43,7 @@ def find_lemma(orig_word, exchange):
         0 	Lemma，如 perceived 的 Lemma 是 perceive
         1 	Lemma 的变换形式，比如 s 代表 apples 是其 lemma 的复数形式
 
-        此外，还有f: b: z:等未知分段
+        此外，还有f: b: z:等分段
 
         https://github.com/skywind3000/ECDICT/issues/23
     """
@@ -53,6 +53,8 @@ def find_lemma(orig_word, exchange):
     inflection = {}
 
     for trans in lists:
+        if len(trans) < 3:
+            continue
         inflection[trans[0]] = trans[2:]
 
     if not inflection.get('0'):
@@ -81,7 +83,7 @@ def init_ecdict_sqlite():
         word = row[0]
         exchange = row[1]
 
-        lemma = find_lemma(word, exchange)['0']
+        lemma = exchange2dict(word, exchange)['0']
 
         # 更新 lemma 列的值
         update_query = "UPDATE stardict SET lemma = ? WHERE word = ?"
@@ -105,6 +107,7 @@ def xlsx_write(word_lines, columns, filename, sheetname='sheet1'):
     worksheet = wb.create_sheet(sheetname)
 
     rows = len(word_lines)
+    print('行数有：', rows)
     if rows <= 1:
         print(f'word_lines行数为{rows}，有误，不写入文件，退出')
         return
@@ -177,4 +180,4 @@ def write_from_file(input_file):
 
 if not Path(MYSQLITE).exists():
     init_ecdict_sqlite()  # 只需运行一次，生成sqlite3 db文件
-write_from_file('FOO_test.txt')
+write_from_file('middleschool1600.txt')
