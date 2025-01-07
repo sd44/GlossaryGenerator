@@ -1,3 +1,4 @@
 [submodule "ECDICT"]
 	path = ECDICT
 	url = git@github.com:sd44/ECDICT.git
+	branch = master
