@@ -180,4 +180,4 @@ def write_from_file(input_file):
 
 if not Path(MYSQLITE).exists():
     init_ecdict_sqlite()  # 只需运行一次，生成sqlite3 db文件
-write_from_file('middleschool1600.txt')
+write_from_file('1984_glossary.txt')
